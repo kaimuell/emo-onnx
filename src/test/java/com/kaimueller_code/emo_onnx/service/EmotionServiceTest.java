@@ -27,6 +27,8 @@ class EmotionServiceTest {
         InputStream inputStream = resource.getInputStream();
         BufferedImage image = ImageIO.read(inputStream);
 
+
+
         assertEquals("Happiness", service.inferEmotion(image));
     }
 
