@@ -1,8 +1,10 @@
 package com.kaimueller_code.emo_onnx.service;
 
-import ai.onnxruntime.*;
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
+import ai.onnxruntime.OrtSession;
 import com.kaimueller_code.emo_onnx.ImageUtils;
-import com.kaimueller_code.emo_onnx.model.EmotionData;
 import com.kaimueller_code.emo_onnx.model.ModelData;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,16 @@ import java.util.Map;
 
 
 @Service
-public class EmotionService {
-
+public class FaceDetectionService {
 
     private final OrtSession session;
     private final ModelData modelData;
     private final OrtEnvironment env;
 
-    EmotionService() throws OrtException, IOException {
+
+    public FaceDetectionService() throws IOException, OrtException {
         // HSEmotion
-        ClassPathResource file = new ClassPathResource("static/enet_b2_8_best.onnx");
+        ClassPathResource file = new ClassPathResource("static/version-RFB-640.onnx");
 
         // nutze CUDA wenn möglich
         OrtSession.SessionOptions options = new OrtSession.SessionOptions();
@@ -31,34 +33,33 @@ public class EmotionService {
 
         this.env = OrtEnvironment.getEnvironment();
         this.session = env.createSession(file.getURI().getPath(), options);
-
-        //normalisation Parameter definiert durch Model
         this.modelData = new ModelData(
-                new Float[]{0.229f, 0.224f, 0.225f},
-                new Float[]{0.485f, 0.456f, 0.406f},
-                260,
-                260
+                new Float[]{128.0f,128.0f,128.0f},
+                new Float[]{127.0f,127.0f,127.0f},
+                320,
+                240
+
         );
     }
 
-
-    public String inferEmotion(BufferedImage image) throws OrtException {
+    public void inferFaceBoundingBox(BufferedImage image) throws OrtException {
         BufferedImage scaledImage = ImageUtils.resizeImage(image, modelData.width(), modelData.height());
         // Normalize the image
         float[][][][] normalizedImg = normalizeImageAndTranspose(scaledImage);
         // Transpose and reshape the image
         OnnxTensor tensor = OnnxTensor.createTensor(env, normalizedImg);
         OrtSession.Result result = session.run(Map.of("input", tensor));
+        float[][] scores = (float[][]) result.get("scores").orElseThrow().getValue();
+        float[][] boxes = (float[][]) result.get("boxes").orElseThrow().getValue();
 
-        float[][] output = (float[][]) result.get("output").orElseThrow().getValue();
-        return EmotionData.getEmotion(output[0]);
+
     }
 
-    /**
-     * normalisiert ein Image entsprechend der Modell-Parameter und transponiert (Python äqivalent np.transpose(image, [2, 0, 1])
-     * @param img
-     * @return
-     */
+
+
+
+
+
     private float[][][][] normalizeImageAndTranspose(BufferedImage img) {
         int width = img.getWidth();
         int height = img.getHeight();
@@ -68,9 +69,9 @@ public class EmotionService {
             for (int x = 0; x < width; x++) {
                 // Get the RGB values
                 int rgb = img.getRGB(x, y);
-                float r = ((rgb >> 16) & 0xFF) / 255.0f;
-                float g = ((rgb >> 8) & 0xFF) / 255.0f;
-                float b = (rgb & 0xFF) / 255.0f;
+                float r = ((rgb >> 16) & 0xFF);
+                float g = ((rgb >> 8) & 0xFF);
+                float b = (rgb & 0xFF);
 
                 // Normalize using mean and std and transpose
                 normalizedImg[0][0][y][x] = (r - modelData.mean()[0]) / modelData.std()[0];  // Red channel
@@ -80,7 +81,4 @@ public class EmotionService {
         }
         return normalizedImg;
     }
-
-
-
 }

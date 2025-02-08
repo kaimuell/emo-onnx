@@ -31,7 +31,7 @@
 </div>
 
 <div id="response">
-    <h3>Response from Server:</h3>
+    <h3>Your inferred emotion:</h3>
     <pre id="responseText"></pre>
 </div>
 
@@ -58,8 +58,9 @@
 
             // If the request was successful
             if (response.ok) {
-                const data = await response.json();
-                document.getElementById("responseText").textContent = JSON.stringify(data, null, 2);
+                const data = await response.text();
+
+                document.getElementById("responseText").textContent = data;
             } else {
                 throw new Error("Failed to upload the file.");
             }
