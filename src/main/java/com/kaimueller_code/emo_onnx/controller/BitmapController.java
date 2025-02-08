@@ -1,8 +1,7 @@
 package com.kaimueller_code.emo_onnx.controller;
 
 
-import ai.onnxruntime.OrtException;
-import com.kaimueller_code.emo_onnx.service.EmotionService;
+import com.kaimueller_code.emo_onnx.service.InferenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 @RestController
@@ -24,7 +22,7 @@ public class BitmapController {
     Logger logger = LoggerFactory.getLogger(BitmapController.class);
 
     @Autowired
-    EmotionService service;
+    InferenceService service;
 
     @CrossOrigin
     @PostMapping("emotion")
@@ -40,7 +38,7 @@ public class BitmapController {
                 return ResponseEntity.badRequest().body("could not open image");
             }
             // Process the image (e.g., save to disk, process content, etc.)
-            String emotion = service.inferEmotion(image);
+            String emotion = service.detectSingleEmotion(image);
             logger.info("infered emoton: " + emotion);
             return ResponseEntity.ok(emotion);
         } catch (Exception e) {

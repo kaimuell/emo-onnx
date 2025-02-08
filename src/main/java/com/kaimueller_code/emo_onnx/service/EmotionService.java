@@ -16,7 +16,7 @@ import java.util.Map;
 public class EmotionService {
 
 
-    private final OrtSession session;
+    private OrtSession session;
     private final ModelData modelData;
     private final OrtEnvironment env;
 
@@ -24,14 +24,17 @@ public class EmotionService {
         // HSEmotion
         ClassPathResource file = new ClassPathResource("static/enet_b2_8_best.onnx");
 
-        // nutze CUDA wenn möglich
-        OrtSession.SessionOptions options = new OrtSession.SessionOptions();
-        options.addCUDA();
-
-
         this.env = OrtEnvironment.getEnvironment();
-        this.session = env.createSession(file.getURI().getPath(), options);
 
+        // nutze CUDA wenn möglich
+        try {
+            OrtSession.SessionOptions options = new OrtSession.SessionOptions();
+            options.addCUDA();
+            this.session = env.createSession(file.getURI().getPath(), options);
+        } catch (OrtException oe){
+            this.session = env.createSession(file.getURI().getPath());
+
+        }
         //normalisation Parameter definiert durch Model
         this.modelData = new ModelData(
                 new Float[]{0.229f, 0.224f, 0.225f},

@@ -18,18 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class EmotionServiceTest {
 
     @Autowired
-    EmotionService service;
+    InferenceService service;
 
     @Test
     public void testEmotionService() throws IOException, OrtException {
 
-        ClassPathResource resource = new ClassPathResource("test_s.jpeg");
+        ClassPathResource resource = new ClassPathResource("test_a.jpg");
         InputStream inputStream = resource.getInputStream();
         BufferedImage image = ImageIO.read(inputStream);
-
-
-
-        assertEquals("Happiness", service.inferEmotion(image));
+        assertEquals("Fröhlich", service.detectSingleEmotion(image));
     }
 
 }
