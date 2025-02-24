@@ -1,4 +1,4 @@
-package com.kaimueller_code.emo_onnx;
+package com.kaimueller_code.emo_onnx.util;
 import com.kaimueller_code.emo_onnx.model.BoundingBox;
 
 import java.util.*;

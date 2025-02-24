@@ -1,6 +1,4 @@
-package com.kaimueller_code.emo_onnx;
-
-import com.kaimueller_code.emo_onnx.model.ModelData;
+package com.kaimueller_code.emo_onnx.util;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

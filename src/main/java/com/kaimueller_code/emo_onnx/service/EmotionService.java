@@ -1,7 +1,7 @@
 package com.kaimueller_code.emo_onnx.service;
 
 import ai.onnxruntime.*;
-import com.kaimueller_code.emo_onnx.ImageUtils;
+import com.kaimueller_code.emo_onnx.util.ImageUtils;
 import com.kaimueller_code.emo_onnx.model.EmotionData;
 import com.kaimueller_code.emo_onnx.model.ModelData;
 import org.springframework.core.io.ClassPathResource;
