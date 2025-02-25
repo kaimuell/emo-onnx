@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,16 +29,16 @@ public class FaceDetectionService {
 
     public FaceDetectionService() throws IOException, OrtException {
         // HSEmotion
-        ClassPathResource file = new ClassPathResource("static/version-RFB-640.onnx");
+        File file = new ClassPathResource("static/version-RFB-640.onnx").getFile();
 
         this.env = OrtEnvironment.getEnvironment();
         // nutze CUDA wenn möglich
         try {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
-            this.session = env.createSession(file.getURI().getPath(), options);
+            this.session = env.createSession(file.getPath(), options);
         } catch (OrtException oe){
-            this.session = env.createSession(file.getURI().getPath());
+            this.session = env.createSession(file.getPath());
         }
         this.modelData = new ModelData(
                 new Float[]{128.0f,128.0f,128.0f},

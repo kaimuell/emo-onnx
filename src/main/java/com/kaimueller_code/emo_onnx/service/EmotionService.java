@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ public class EmotionService {
 
     EmotionService() throws OrtException, IOException {
         // HSEmotion
-        ClassPathResource file = new ClassPathResource("static/enet_b2_8_best.onnx");
+        File file = new ClassPathResource("static/enet_b2_8_best.onnx").getFile();
 
         this.env = OrtEnvironment.getEnvironment();
 
@@ -30,9 +31,9 @@ public class EmotionService {
         try {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
-            this.session = env.createSession(file.getURI().getPath(), options);
+            this.session = env.createSession(file.getPath(), options);
         } catch (OrtException oe){
-            this.session = env.createSession(file.getURI().getPath());
+            this.session = env.createSession(file.getPath());
 
         }
         //normalisation Parameter definiert durch Model
