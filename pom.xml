@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.kaimueller-code</groupId>
 	<artifactId>emo-onnx</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>emo-onnx</name>
 	<description>emotion detection with onnx</description>
 	<url/>
