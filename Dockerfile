@@ -1,9 +1,9 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 COPY target/emo-onnx-0.1.jar app.jar
 
-RUN apk update && apk add libstdc++
+#RUN apt update && apt add g++ && apk add gcompat
 
 EXPOSE 8080
 
