@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 
@@ -22,7 +26,11 @@ public class EmotionService {
 
     EmotionService() throws OrtException, IOException {
         // HSEmotion
-        ClassPathResource file = new ClassPathResource("static/enet_b2_8_best.onnx");
+        String file = "./em.onnx";
+        InputStream is = new ClassPathResource("static/enet_b2_8_best.onnx").getInputStream();
+        Files.copy(is, Paths.get(file), StandardCopyOption.REPLACE_EXISTING);
+
+        //String file = new ClassPathResource("static/enet_b2_8_best.onnx");
 
         this.env = OrtEnvironment.getEnvironment();
 
@@ -30,9 +38,9 @@ public class EmotionService {
         try {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
-            this.session = env.createSession(file.getURI().getPath(), options);
+            this.session = env.createSession(file, options);
         } catch (OrtException oe){
-            this.session = env.createSession(file.getURI().getPath());
+            this.session = env.createSession(file);
 
         }
         //normalisation Parameter definiert durch Model

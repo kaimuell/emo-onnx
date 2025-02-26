@@ -8,11 +8,19 @@ import com.kaimueller_code.emo_onnx.util.BoundingBoxUtils;
 import com.kaimueller_code.emo_onnx.util.ImageUtils;
 import com.kaimueller_code.emo_onnx.model.BoundingBox;
 import com.kaimueller_code.emo_onnx.model.ModelData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,19 +33,23 @@ public class FaceDetectionService {
     private final ModelData modelData;
     private final OrtEnvironment env;
 
+    @Autowired
+    ResourceLoader resourceLoader;
 
     public FaceDetectionService() throws IOException, OrtException {
         // HSEmotion
-        ClassPathResource file = new ClassPathResource("static/version-RFB-640.onnx");
+        String file = "./fd.onnx";
+        InputStream is = new ClassPathResource("static/version-RFB-640.onnx").getInputStream();
+        Files.copy(is, Paths.get(file), StandardCopyOption.REPLACE_EXISTING);
 
         this.env = OrtEnvironment.getEnvironment();
         // nutze CUDA wenn möglich
         try {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
-            this.session = env.createSession(file.getURI().getPath(), options);
+            this.session = env.createSession(file, options);
         } catch (OrtException oe){
-            this.session = env.createSession(file.getURI().getPath());
+            this.session = env.createSession(file);
         }
         this.modelData = new ModelData(
                 new Float[]{128.0f,128.0f,128.0f},
