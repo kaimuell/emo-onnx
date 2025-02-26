@@ -24,12 +24,12 @@ class BitmapControllerTest {
 
 @Test
         public void testFileUpload() throws Exception {
-    ClassPathResource resource = new ClassPathResource("test_s.jpeg");
+    ClassPathResource resource = new ClassPathResource("test_b.jpg");
     File file = resource.getFile();
     MockMultipartFile mockMultipartFile = new MockMultipartFile("file", file.getName(), "image/jpeg", Files.readAllBytes(file.toPath()));
     // Send the POST request with the image file
         mockMvc.perform(multipart("/emotion").file(mockMultipartFile))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().string("Happiness"));
+            .andExpect(MockMvcResultMatchers.content().string("Fröhlich"));
 }
 }
