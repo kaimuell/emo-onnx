@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>How did you feel?</title>
+    <script
+            src="/js/jquery-3.7.1.min.js"
+    ></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 100px;
+            text-align: center;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+<h2>Lade ein Bild hoch mit dem Gesichtsausdruck der zeigt wie du dich während des Vortrags fühltest:</h2>
+<br>
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required />
+    <button type="submit">Abschicken</button>
+</form><br>
+<div id="result" style="margin-top: 20px;"></div>
+<script>
+    $(document).ready(function () {
+      $("#uploadForm").on("submit", function (event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+          url: "/emotion",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            $("#result").text("Danke dir! Du warst : " + response);
+          },
+          error: function (jqXHR) {
+            $("#result").text("Error: " + jqXHR.responseText);
+          },
+        });
+      });
+    });
+</script>
+</body>
+</html>
