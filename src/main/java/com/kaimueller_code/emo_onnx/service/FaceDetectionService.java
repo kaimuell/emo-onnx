@@ -48,9 +48,8 @@ public class FaceDetectionService {
 
     public Optional<BufferedImage> inferFace(BufferedImage image) throws OrtException {
         BufferedImage scaledImage = ImageUtils.resizeImage(image, modelData.width(), modelData.height());
-        // Normalize the image
+        // normalisiere das image
         float[][][][] normalizedImg = normalizeImageAndTranspose(scaledImage);
-        // Transpose and reshape the image
         OnnxTensor tensor = OnnxTensor.createTensor(env, normalizedImg);
         OrtSession.Result result = session.run(Map.of("input", tensor));
         try (
@@ -76,13 +75,13 @@ public class FaceDetectionService {
         float[][][][] normalizedImg = new float[1][3][height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                // Get the RGB values
+                // Hole RGB-Werte
                 int rgb = img.getRGB(x, y);
                 float r = ((rgb >> 16) & 0xFF);
                 float g = ((rgb >> 8) & 0xFF);
                 float b = (rgb & 0xFF);
 
-                // Normalize using mean and std and transpose
+                // normalisiere mit mean, std und transpose
                 normalizedImg[0][0][y][x] = (r - modelData.mean()[0]) / modelData.std()[0];  // Red channel
                 normalizedImg[0][1][y][x] = (g - modelData.mean()[1]) / modelData.std()[1];  // Green channel
                 normalizedImg[0][2][y][x] = (b - modelData.mean()[2]) / modelData.std()[2];  // Blue channel
