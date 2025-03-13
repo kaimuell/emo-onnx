@@ -3,7 +3,7 @@ package com.kaimueller_code.emo_onnx.model;
 
 public class EmotionData {
 
-    private static String[] emotions={"Wütend", "Verachtungsvoll", "Angeekelt", "Ängstlich", "Fröhlich", "Neutral", "Traurig", "Überrascht"};
+    private static final String[] emotions={"Wütend", "Verachtungsvoll", "Angeekelt", "Ängstlich", "Fröhlich", "Neutral", "Traurig", "Überrascht"};
     public static String getEmotion(float[] emotionScores){
         int bestInd=-1;
         if (emotionScores!=null){
