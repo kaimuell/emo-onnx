@@ -53,7 +53,7 @@ public class EmotionService {
         OnnxTensor tensor = OnnxTensor.createTensor(env, normalizedImg);
         OrtSession.Result result = session.run(Map.of("input", tensor));
         try (
-                var outputMem = result.get("output").orElseThrow();
+                var outputMem = result.get("output").orElseThrow()
         ) {
             float[][] output = (float[][]) outputMem.getValue();
             return EmotionData.getEmotion(output[0]);
