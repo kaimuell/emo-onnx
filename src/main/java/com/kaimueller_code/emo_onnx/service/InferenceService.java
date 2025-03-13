@@ -21,10 +21,10 @@ public class InferenceService {
     }
 
     public String detectSingleEmotion(BufferedImage image) throws OrtException {
-        Optional<BufferedImage> cropedImage = faceDetectionService.inferFace(image);
-        if (cropedImage.isEmpty()){
+        Optional<BufferedImage> croppedImage = faceDetectionService.inferFace(image);
+        if (croppedImage.isEmpty()){
             return "NA";
         }
-        return emotionService.inferEmotion(cropedImage.get());
+        return emotionService.inferEmotion(croppedImage.get());
     }
 }

@@ -32,7 +32,7 @@ public class EmotionService {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
             this.session = env.createSession(file.getPath(), options);
-        } catch (OrtException oe){
+        } catch (OrtException oe) {
             this.session = env.createSession(file.getPath());
 
         }
@@ -48,35 +48,37 @@ public class EmotionService {
 
     public String inferEmotion(BufferedImage image) throws OrtException {
         BufferedImage scaledImage = ImageUtils.resizeImage(image, modelData.width(), modelData.height());
-        // Normalize the image
+        // normalisiere das Image
         float[][][][] normalizedImg = normalizeImageAndTranspose(scaledImage);
-        // Transpose and reshape the image
         OnnxTensor tensor = OnnxTensor.createTensor(env, normalizedImg);
         OrtSession.Result result = session.run(Map.of("input", tensor));
-
-        float[][] output = (float[][]) result.get("output").orElseThrow().getValue();
-        return EmotionData.getEmotion(output[0]);
+        try (
+                var outputMem = result.get("output").orElseThrow();
+        ) {
+            float[][] output = (float[][]) outputMem.getValue();
+            return EmotionData.getEmotion(output[0]);
+        }
     }
 
     /**
-     * normalisiert ein Image entsprechend der Modell-Parameter und transponiert (Python äqivalent np.transpose(image, [2, 0, 1])
-     * @param img
-     * @return
+     * normalisiert ein Image entsprechend der Modell-Parameter und transponiert (Python äquivalent np.transpose(image, [2, 0, 1])
+     *
+     * @param image das Image
      */
-    private float[][][][] normalizeImageAndTranspose(BufferedImage img) {
-        int width = img.getWidth();
-        int height = img.getHeight();
+    private float[][][][] normalizeImageAndTranspose(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
 
         float[][][][] normalizedImg = new float[1][3][height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                // Get the RGB values
-                int rgb = img.getRGB(x, y);
+                // Hole RGB-Werte
+                int rgb = image.getRGB(x, y);
                 float r = ((rgb >> 16) & 0xFF) / 255.0f;
                 float g = ((rgb >> 8) & 0xFF) / 255.0f;
                 float b = (rgb & 0xFF) / 255.0f;
 
-                // Normalize using mean and std and transpose
+                // normalisiere mit mean, std und transpose
                 normalizedImg[0][0][y][x] = (r - modelData.mean()[0]) / modelData.std()[0];  // Red channel
                 normalizedImg[0][1][y][x] = (g - modelData.mean()[1]) / modelData.std()[1];  // Green channel
                 normalizedImg[0][2][y][x] = (b - modelData.mean()[2]) / modelData.std()[2];  // Blue channel
@@ -84,7 +86,6 @@ public class EmotionService {
         }
         return normalizedImg;
     }
-
 
 
 }

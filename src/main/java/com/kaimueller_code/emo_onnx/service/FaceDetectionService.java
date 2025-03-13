@@ -1,9 +1,6 @@
 package com.kaimueller_code.emo_onnx.service;
 
-import ai.onnxruntime.OnnxTensor;
-import ai.onnxruntime.OrtEnvironment;
-import ai.onnxruntime.OrtException;
-import ai.onnxruntime.OrtSession;
+import ai.onnxruntime.*;
 import com.kaimueller_code.emo_onnx.util.BoundingBoxUtils;
 import com.kaimueller_code.emo_onnx.util.ImageUtils;
 import com.kaimueller_code.emo_onnx.model.BoundingBox;
@@ -37,12 +34,12 @@ public class FaceDetectionService {
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
             options.addCUDA();
             this.session = env.createSession(file.getPath(), options);
-        } catch (OrtException oe){
+        } catch (OrtException oe) {
             this.session = env.createSession(file.getPath());
         }
         this.modelData = new ModelData(
-                new Float[]{128.0f,128.0f,128.0f},
-                new Float[]{127.0f,127.0f,127.0f},
+                new Float[]{128.0f, 128.0f, 128.0f},
+                new Float[]{127.0f, 127.0f, 127.0f},
                 640,
                 480
 
@@ -56,19 +53,20 @@ public class FaceDetectionService {
         // Transpose and reshape the image
         OnnxTensor tensor = OnnxTensor.createTensor(env, normalizedImg);
         OrtSession.Result result = session.run(Map.of("input", tensor));
-        float[][][] scores = (float[][][]) result.get("scores").orElseThrow().getValue();
-        float[][][] boxes = (float[][][]) result.get("boxes").orElseThrow().getValue();
-        List<BoundingBox> bboxes = BoundingBoxUtils.predict(image.getWidth(), image.getHeight(), scores[0], boxes[0], 0.5f, 0.5f, 1);
-        if (!bboxes.isEmpty()){
-            BoundingBox box = bboxes.getFirst(); //topk = 1 deshalb nur wahrscheinlichste BB
-           return Optional.of(image.getSubimage((int) box.left(), (int) box.top(), (int) (box.right()-box.left()), (int) (box.bottom()-box.top())));
+        try (
+                OnnxValue scoresMem = result.get("scores").orElseThrow();
+                OnnxValue boxesMem = result.get("boxes").orElseThrow()
+        ) {
+            float[][][] scores = (float[][][]) scoresMem.getValue();
+            float[][][] boxes = (float[][][]) boxesMem.getValue();
+            List<BoundingBox> bboxes = BoundingBoxUtils.predict(image.getWidth(), image.getHeight(), scores[0], boxes[0], 0.5f, 0.5f, 1);
+            if (!bboxes.isEmpty()) {
+                BoundingBox box = bboxes.getFirst(); //topk = 1 deshalb nur wahrscheinlichste BB
+                return Optional.of(image.getSubimage((int) box.left(), (int) box.top(), (int) (box.right() - box.left()), (int) (box.bottom() - box.top())));
+            }
+            return Optional.empty();
         }
-        return Optional.empty();
     }
-
-
-
-
 
 
     private float[][][][] normalizeImageAndTranspose(BufferedImage img) {
